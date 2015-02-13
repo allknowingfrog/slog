@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<style>
+body {
+    background: gray;
+}
+canvas {
+    display: block;
+    margin: 30px auto 0;
+    border: 1px dashed white;
+    background: black;
+}
+</style>
+<script>
+//canvas vars
+var canvas;
+var CANVAS_W = 600;
+var CANVAS_H = 600;
+var ctx;
+
+var TILE_W = 50;
+var TILE_H = Math.sqrt(3)/2 * TILE_W;
+
+var tiles = {
+    red: new Image(),
+    blue: new Image()
+};
+tiles.red.src = 'redHex.svg';
+tiles.blue.src = 'blueHex.svg';
+
+var map = [];
+for(var x=0; x<19; x++) {
+    map[x] = [];
+    for(var y=0; y<19; y++) {
+        map[x][y] = {
+            tile: tiles.blue
+        };
+    }
+}
+
+for(var y=0; y<19; y++) {
+    map[9][y].tile = tiles.red;
+}
+
+var dirs = {
+    n:  {x:  0,  y: -1},
+    ne: {x:  1,  y:  0},
+    se: {x:  1,  y:  1},
+    s:  {x:  0,  y:  1},
+    sw: {x: -1,  y:  0},
+    nw: {x: -1,  y: -1}
+};
+
+var pos = {
+    x: 9,
+    y: 9
+}
+
+//init functions
+function init() {
+    canvas = document.getElementById('canvas');
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
+    ctx = canvas.getContext('2d');
+
+    draw();
+}
+
+function draw() {
+    var xStart = (CANVAS_W / 2) - (TILE_W / 2);
+    var yStart = (CANVAS_H / 2) - (TILE_H / 2);
+    var tile, xRel, yRel, xDraw, yDraw;
+    for(var x=0; x<19; x++) {
+        for(var y=0; y<19; y++) {
+            tile = map[x][y].tile;
+            xRel = x - pos.x;
+            yRel = y - pos.y;
+            xDraw = xStart + (xRel * (.75 * TILE_W)); 
+            yDraw = yStart + ((yRel + (xRel / 2)) * TILE_H); 
+            ctx.drawImage(tile, xDraw, yDraw, TILE_W, TILE_H);
+        }
+    }
+}
+
+//start game
+$(document).ready(function() {
+    setTimeout(init, 1000);
+});
+</script>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+</html>
