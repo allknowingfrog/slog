@@ -41,14 +41,14 @@ var keyBind = {
 
 var tiles = {
     player: new Image(),
-    red: new Image(),
-    green: new Image(),
-    blue: new Image()
+    land: new Image(),
+    water: new Image(),
+    red: new Image()
 };
 tiles.player.src = 'player.svg';
+tiles.land.src = 'greenHex.svg';
+tiles.water.src = 'blueHex.svg';
 tiles.red.src = 'redHex.svg';
-tiles.green.src = 'greenHex.svg';
-tiles.blue.src = 'blueHex.svg';
 
 function keyPress(key) {
     for(var k in keyBind) {
@@ -65,7 +65,6 @@ function init(data) {
     CANVAS_H = data.CANVAS_H;
     TILE_W = data.TILE_W;
     TILE_H = Math.sqrt(3)/2 * TILE_W;
-    FPS = data.FPS;
     dirs = data.dirs;
     view = data.view;
 
@@ -78,29 +77,29 @@ function init(data) {
         e.preventDefault();
         keyPress(e.which);
     }); 
-
-    setInterval(draw, 1000/FPS);
 }
 
 function draw() {
     var xStart = (CANVAS_W / 2) - (TILE_W / 2);
     var yStart = (CANVAS_H / 2) - (TILE_H / 2);
     var origin = Math.floor(view.length/2);
-    var tileKey, xRel, yRel, xDraw, yDraw;
+    var terrain, player, xRel, yRel, xDraw, yDraw;
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
     for(var x=0; x<view.length; x++) {
         for(var y=0; y<view.length; y++) {
-            tileKey = view[x][y].tile;
-            if(tileKey) {
+            terrain = view[x][y].terrain;
+            if(terrain) {
                 xRel = x - origin;
                 yRel = y - origin;
                 xDraw = xStart + (xRel * (.75 * TILE_W)); 
                 yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H); 
-                ctx.drawImage(tiles[tileKey], xDraw, yDraw, TILE_W, TILE_H);
+                ctx.drawImage(tiles[terrain], xDraw, yDraw, TILE_W, TILE_H);
+                if(view[x][y].player) {
+                    ctx.drawImage(tiles.player, xDraw, yDraw, TILE_W, TILE_H);
+                }
             }
         }
     }
-    ctx.drawImage(tiles.player, xStart, yStart, TILE_W, TILE_H);
 }
 
 //start game
@@ -120,6 +119,7 @@ $(document).ready(function() {
     });
     socket.on('update', function(data) {
         view = data;
+        draw();
     });
 });
 </script>

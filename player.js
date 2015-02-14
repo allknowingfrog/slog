@@ -6,6 +6,8 @@ module.exports = function(nickname, x, y, validCoords) {
 
     this.nextMove = '';
 
+    map[x][y].player = this;
+
     this.getView = function() {
         var xMin = this.x - VIEW_RANGE;
         var xMax = this.x + VIEW_RANGE;
@@ -19,9 +21,12 @@ module.exports = function(nickname, x, y, validCoords) {
             for(var y=yMin; y<=yMax; y++) {
                 yRel = view[xRel].length;
                 if(Math.abs(xRel-yRel) <= VIEW_RANGE && validCoords(x, y)) {
-                    view[xRel][yRel] = map[x][y];
+                    view[xRel][yRel] = {
+                        terrain: map[x][y].terrain
+                    }
+                    if(map[x][y].player) view[xRel][yRel].player = true;
                 } else {
-                    view[xRel][yRel] = "";
+                    view[xRel][yRel] = {};
                 }
             }
         }
@@ -35,12 +40,9 @@ module.exports = function(nickname, x, y, validCoords) {
                 var dir = dirs[this.nextMove];
                 var xx = this.x + dir.x;
                 var yy = this.y + dir.y;
-                if(validCoords(xx, yy)) {
-                    this.x = xx;
-                    this.y = yy;
-                }
+                map[this.x][this.y].sendPlayer(xx, yy);
             } else if(this.nextMove == 'action') {
-                map[this.x][this.y].tile = 'blue';
+                map[this.x][this.y].makeTerrain('water');
             }
             this.nextMove = '';
         }

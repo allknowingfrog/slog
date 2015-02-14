@@ -5,6 +5,7 @@ var io = require('socket.io').listen(server);
 var fs = require('fs');
 
 var player = require('./player.js');
+var cell = require('./cell.js');
 
 //globals
 users = {};
@@ -14,10 +15,9 @@ CANVAS_W = 600;
 CANVAS_H = 600;
 TILE_W = 50;
 MAP_SIZE = 101;
-VIEW_RANGE = 4;
+VIEW_RANGE = 6;
 
-TPS = 60;
-FPS = 15;
+TPS = 20;
 
 dirs = {
     nw: {x: -1,  y: -1},
@@ -32,9 +32,7 @@ map = [];
 for(var x=0; x<MAP_SIZE; x++) {
     map[x] = [];
     for(var y=0; y<MAP_SIZE; y++) {
-        map[x][y] = {
-            tile: "green" 
-        };
+        map[x][y] = new cell(x, y, "land", validCoords);
     }
 }
 
@@ -67,7 +65,6 @@ io.sockets.on('connection', function(socket) {
                 CANVAS_W: CANVAS_W,
                 CANVAS_H: CANVAS_H,
                 TILE_W: TILE_W,
-                FPS: FPS,
                 dirs: dirs,
                 view: view
             });
@@ -88,7 +85,7 @@ io.sockets.on('connection', function(socket) {
     });
 });
 
-setInterval(gameLoop, 1000/FPS);
+setInterval(gameLoop, 1000/TPS);
 
 function gameLoop() {
     for(var p in players) {
