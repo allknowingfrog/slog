@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Slog</title>
+<meta charset="utf-8">
+<style>
+body {
+    background: gray;
+}
+canvas {
+    display: block;
+    margin: 30px auto 0;
+    background: black;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+var socket = io.connect();
+
+var canvas;
+var CANVAS_W;
+var CANVAS_H;
+var ctx;
+
+var TILE_W;
+var TILE_H;
+var view;
+var dirs;
+
+//dvorak homerow
+var keyBind = {
+    nw: 44, //,
+    n: 46, //.
+    ne: 112, //p
+    se: 117, //u
+    s: 101, //e
+    sw: 111, //a
+    action: 32 //space
+}
+
+var tiles = {
+    player: new Image(),
+    red: new Image(),
+    green: new Image(),
+    blue: new Image()
+};
+tiles.player.src = 'player.svg';
+tiles.red.src = 'redHex.svg';
+tiles.green.src = 'greenHex.svg';
+tiles.blue.src = 'blueHex.svg';
+
+function keyPress(key) {
+    for(var k in keyBind) {
+        if(keyBind[k] == key) {
+            socket.emit('keyPress', k); 
+            break;
+        }
+    }
+}
+
+//init functions
+function init(data) {
+    CANVAS_W = data.CANVAS_W;
+    CANVAS_H = data.CANVAS_H;
+    TILE_W = data.TILE_W;
+    TILE_H = Math.sqrt(3)/2 * TILE_W;
+    FPS = data.FPS;
+    dirs = data.dirs;
+    view = data.view;
+
+    canvas = document.getElementById('canvas');
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
+    ctx = canvas.getContext('2d');
+
+    $(document).keypress(function(e) {
+        e.preventDefault();
+        keyPress(e.which);
+    }); 
+
+    setInterval(draw, 1000/FPS);
+}
+
+function draw() {
+    var xStart = (CANVAS_W / 2) - (TILE_W / 2);
+    var yStart = (CANVAS_H / 2) - (TILE_H / 2);
+    var origin = Math.floor(view.length/2);
+    var tileKey, xRel, yRel, xDraw, yDraw;
+    ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+    for(var x=0; x<view.length; x++) {
+        for(var y=0; y<view.length; y++) {
+            tileKey = view[x][y].tile;
+            if(tileKey) {
+                xRel = x - origin;
+                yRel = y - origin;
+                xDraw = xStart + (xRel * (.75 * TILE_W)); 
+                yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H); 
+                ctx.drawImage(tiles[tileKey], xDraw, yDraw, TILE_W, TILE_H);
+            }
+        }
+    }
+    ctx.drawImage(tiles.player, xStart, yStart, TILE_W, TILE_H);
+}
+
+//start game
+$(document).ready(function() {
+    $('#login').submit(function(e) {
+        e.preventDefault();
+        socket.emit('login', $('#nickname').val(), function(data) {
+            if(data) {
+                $('#loginDiv').hide();
+                $('#gameDiv').show();
+                init(data);
+            } else {
+                $('#output').html('That username is already taken! Try again.');
+            }
+        });
+        $('#nickname').val('');
+    });
+    socket.on('update', function(data) {
+        view = data;
+    });
+});
+</script>
+</head>
+<body>
+
+<div id="loginDiv" style="margin:50px;">
+    <div style='float:left;'>Enter a username:</div>
+    <form id="login">
+        <input style="width:150px;" id="nickname">
+        <input type="submit">
+    </form>
+</div>
+
+<div id="gameDiv" style="width:100%;display:none;">
+    <div style="margin:50px;">
+        <div style="float:left;margin-right:15px;"><canvas id="canvas"></canvas></div>
+        <div id="sidebar"></div>
+    </div>
+</div>
+
+<div id="output" style='width:100%;'></div>
+
+</body>
+</html>
