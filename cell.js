@@ -5,16 +5,29 @@ module.exports = function(x, y, terrain, validCoords) {
     this.passable;
     this.structure;
     this.player;
+    this.outside;
 
     this.makeTerrain = function(terrain) {
         switch(terrain) {
             case "land":
                 this.terrain = terrain;
                 this.passable = true;
+                this.outside = true;
                 break;
             case "water":
                 this.terrain = terrain;
                 this.passable = false;
+                this.outside = true;
+                break;
+            case "wall":
+                this.terrain = terrain;
+                this.passable = false;
+                this.outside = false;
+                break;
+            case "cave":
+                this.terrain = terrain;
+                this.passable = true;
+                this.outside = false;
                 break;
         }
     };

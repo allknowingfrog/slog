@@ -36,18 +36,26 @@ var keyBind = {
     se: 117, //u
     s: 101, //e
     sw: 111, //a
-    action: 32 //space
+    action: 32, //space
+    land: 49, //1
+    water: 50, //2
+    wall: 51, //3
+    cave: 52 //4
 }
 
 var tiles = {
     player: new Image(),
     land: new Image(),
     water: new Image(),
+    wall: new Image(),
+    cave: new Image(),
     red: new Image()
 };
 tiles.player.src = 'player.svg';
 tiles.land.src = 'greenHex.svg';
 tiles.water.src = 'blueHex.svg';
+tiles.wall.src = 'grayHex.svg';
+tiles.cave.src = 'brownHex.svg';
 tiles.red.src = 'redHex.svg';
 
 function keyPress(key) {
