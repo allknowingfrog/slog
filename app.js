@@ -64,12 +64,15 @@ io.sockets.on('connection', function(socket) {
             p.invAdd(new shovel('water'));
             p.invAdd(new shovel('wall'));
             p.invAdd(new shovel('cave'));
+            p.invAdd(new shovel('woods'));
             var view = players[socket.nickname].getView();
+            var inventory = players[socket.nickname].getInventory();
             callback({
                 login: data,
                 VIEW_RANGE: VIEW_RANGE,
                 dirs: dirs,
-                view: view
+                view: view,
+                inventory: inventory
             });
         } else {
             callback(false);
@@ -96,9 +99,10 @@ function gameLoop() {
         players[p].move();
     }
 
-    var view;
+    var data = {};
     for(var p in players) {
-        view = players[p].getView();
-        users[p].emit('update', view);
+        data.view = players[p].getView();
+        data.inventory = players[p].getInventory();
+        users[p].emit('update', data);
     }
 }

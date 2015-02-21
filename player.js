@@ -17,7 +17,7 @@ module.exports = function(nickname, cell, validCoords) {
                 yRel = view[xRel].length;
                 view[xRel][yRel] = {};
                 if(Math.abs(xRel-yRel) <= VIEW_RANGE && validCoords(xx, yy)) {
-                    if(map[xx][yy].outside || (xx >= x-INSIDE_RANGE && xx <= x+INSIDE_RANGE && yy >= y-INSIDE_RANGE && yy <= y+INSIDE_RANGE && Math.abs(xRel-yRel) <= INSIDE_RANGE)) {
+                    if(map[xx][yy].lit || (xx >= x-INSIDE_RANGE && xx <= x+INSIDE_RANGE && yy >= y-INSIDE_RANGE && yy <= y+INSIDE_RANGE && Math.abs(xRel-yRel) <= INSIDE_RANGE)) {
                         view[xRel][yRel].terrain = map[xx][yy].terrain;
                         if(map[xx][yy].player) view[xRel][yRel].player = true;
                     }
@@ -26,6 +26,17 @@ module.exports = function(nickname, cell, validCoords) {
         }
 
         return view;
+    };
+
+    this.getInventory = function() {
+        var inv = [];
+        for(var i=0; i<this.inventory.length; i++) {
+            if(this.inventory[i].id == 'shovel') {
+                inv[inv.length] = this.inventory[i].terrain;
+            }
+        }
+
+        return inv;
     };
 
     this.move = function() {
@@ -40,7 +51,7 @@ module.exports = function(nickname, cell, validCoords) {
                     if(action == 'move') {
                         map[this.cell.x][this.cell.y].sendPlayer(xx, yy);
                     } else if(action == 'use') {
-                        this.inventory[inv].use(map[xx][yy]);
+                        if(this.inventory[inv]) this.inventory[inv].use(map[xx][yy]);
                     }
                 }
             }
