@@ -42,8 +42,7 @@ module.exports = function(x, y, terrain, validCoords) {
             var dest = map[x][y];
             if(dest.passable && !dest.player) {
                 dest.player = this.player;
-                this.player.x = x;
-                this.player.y = y;
+                this.player.cell = dest;
                 this.player = null;
                 return true;
             } else {

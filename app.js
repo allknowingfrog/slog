@@ -6,6 +6,7 @@ var fs = require('fs');
 
 var player = require('./player.js');
 var cell = require('./cell.js');
+var shovel = require('./shovel.js');
 
 //globals
 users = {};
@@ -18,13 +19,12 @@ INSIDE_RANGE = 2;
 TPS = 20;
 
 dirs = {
-    nw:   {x: -1,  y: -1},
-    n:    {x:  0,  y: -1},
-    ne:   {x:  1,  y:  0},
-    se:   {x:  1,  y:  1},
-    s:    {x:  0,  y:  1},
-    sw:   {x: -1,  y:  0},
-    here: {x:  0,  y:  0}
+    nw: {x: -1,  y: -1},
+    n:  {x:  0,  y: -1},
+    ne: {x:  1,  y:  0},
+    se: {x:  1,  y:  1},
+    s:  {x:  0,  y:  1},
+    sw: {x: -1,  y:  0}
 };
 
 map = [];
@@ -58,7 +58,12 @@ io.sockets.on('connection', function(socket) {
         } else if(data) {
             socket.nickname = data;
             users[socket.nickname] = socket;
-            players[socket.nickname] = new player(socket.nickname, 5, 5, validCoords);
+            players[socket.nickname] = new player(socket.nickname, map[5][5], validCoords);
+            var p = players[socket.nickname];
+            p.invAdd(new shovel('land'));
+            p.invAdd(new shovel('water'));
+            p.invAdd(new shovel('wall'));
+            p.invAdd(new shovel('cave'));
             var view = players[socket.nickname].getView();
             callback({
                 login: data,
@@ -75,6 +80,7 @@ io.sockets.on('connection', function(socket) {
     });
     socket.on('disconnect', function(data) {
         if(socket.nickname) {
+            players[socket.nickname].cell.player = null;
             delete users[socket.nickname];
             delete players[socket.nickname];
         } else {
