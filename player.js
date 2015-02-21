@@ -18,7 +18,7 @@ module.exports = function(nickname, x, y, validCoords) {
                 yRel = view[xRel].length;
                 view[xRel][yRel] = {};
                 if(Math.abs(xRel-yRel) <= VIEW_RANGE && validCoords(x, y)) {
-                    if(map[x][y].outside || (x >= this.x - INSIDE_RANGE && x <= this.x + INSIDE_RANGE && y >= this.y - INSIDE_RANGE && this.y <= y + INSIDE_RANGE && Math.abs(xRel-yRel) <= INSIDE_RANGE)) {
+                    if(map[x][y].outside || (x >= this.x - INSIDE_RANGE && x <= this.x + INSIDE_RANGE && y >= this.y - INSIDE_RANGE && y <= this.y + INSIDE_RANGE && Math.abs(xRel-yRel) <= INSIDE_RANGE)) {
                         view[xRel][yRel].terrain = map[x][y].terrain;
                         if(map[x][y].player) view[xRel][yRel].player = true;
                     }
