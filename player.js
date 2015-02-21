@@ -31,20 +31,24 @@ module.exports = function(nickname, x, y, validCoords) {
 
     this.move = function() {
         if(this.nextMove) {
-            if(dirs[this.nextMove]) {
-                var dir = dirs[this.nextMove];
+            var action = this.nextMove.action;
+            var dir = dirs[this.nextMove.dir];
+            if(dir) {
                 var xx = this.x + dir.x;
                 var yy = this.y + dir.y;
-                map[this.x][this.y].sendPlayer(xx, yy);
-            } else if(this.nextMove == 'action') {
-            } else if(this.nextMove == 'land') {
-                map[this.x][this.y].makeTerrain('land');
-            } else if(this.nextMove == 'water') {
-                map[this.x][this.y].makeTerrain('water');
-            } else if(this.nextMove == 'wall') {
-                map[this.x][this.y].makeTerrain('wall');
-            } else if(this.nextMove == 'cave') {
-                map[this.x][this.y].makeTerrain('cave');
+                if(validCoords(xx, yy)) {
+                    if(action == 'move') {
+                        map[this.x][this.y].sendPlayer(xx, yy);
+                    } else if(action == 'land') {
+                        map[xx][yy].makeTerrain('land');
+                    } else if(action == 'water') {
+                        map[xx][yy].makeTerrain('water');
+                    } else if(action == 'wall') {
+                        map[xx][yy].makeTerrain('wall');
+                    } else if(action == 'cave') {
+                        map[xx][yy].makeTerrain('cave');
+                    }
+                }
             }
             this.nextMove = '';
         }

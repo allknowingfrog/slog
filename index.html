@@ -29,37 +29,46 @@ var TILE_H;
 var VIEW_RANGE;
 var view;
 var dirs;
+var action;
 
 var keyBind;
 
 //dvorak homerow
 var dvorak = {
-    nw: 44, //,
-    n: 46, //.
-    ne: 112, //p
-    se: 117, //u
-    s: 101, //e
-    sw: 111, //a
-    action: 32, //space
-    land: 49, //1
-    water: 50, //2
-    wall: 51, //3
-    cave: 52 //4
+    dirs: {
+        nw: 44, //,
+        n: 46, //.
+        ne: 112, //p
+        se: 117, //u
+        s: 101, //e
+        sw: 111, //a
+        here: 32 //space
+    },
+    actions: {
+        land: 49, //1
+        water: 50, //2
+        wall: 51, //3
+        cave: 52 //4
+    }
 };
 
 //qwerty homerow
 var qwerty = {
-    nw: 119, //w
-    n: 101, //e
-    ne: 114, //r
-    se: 102, //f
-    s: 100, //d
-    sw: 115, //s
-    action: 32, //space
-    land: 49, //1
-    water: 50, //2
-    wall: 51, //3
-    cave: 52 //4
+    dirs: {
+        nw: 119, //w
+        n: 101, //e
+        ne: 114, //r
+        se: 102, //f
+        s: 100, //d
+        sw: 115, //s
+        here: 32 //space
+    },
+    actions: {
+        land: 49, //1
+        water: 50, //2
+        wall: 51, //3
+        cave: 52 //4
+    }
 };
 
 var tiles = {
@@ -78,10 +87,28 @@ tiles.cave.src = 'brownHex.svg';
 tiles.red.src = 'redHex.svg';
 
 function keyPress(key) {
-    for(var k in keyBind) {
-        if(keyBind[k] == key) {
-            socket.emit('keyPress', k); 
-            break;
+    var aBinds = keyBind.actions;
+    for(var a in aBinds) {
+        if(aBinds[a] == key) {
+            action = a;
+            return true;
+        }
+    }
+
+    var dBinds = keyBind.dirs;
+    for(var d in dBinds) {
+        if(dBinds[d] == key) {
+            var command = {};
+            if(action) {
+                command.action = action;
+                command.dir = d;
+                action = '';
+            } else {
+                command.action = 'move';
+                command.dir = d;
+            }
+            socket.emit('keyPress', command);
+            return true;
         }
     }
 }
@@ -92,21 +119,23 @@ function init(data) {
     dirs = data.dirs;
     view = data.view;
 
-    keyBind = dvorak;
+    var doQwerty = localStorage.getItem('qwerty');
+    setQwerty(doQwerty);
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
-    setCanvasWidth(600);
+    setCanvasWidth(localStorage.getItem('canvas-width'));
 
     $(document).keypress(function(e) {
         e.preventDefault();
         keyPress(e.which);
-    }); 
+    });
 }
 
 function setCanvasWidth(width) {
-    CANVAS_W = width;
+    CANVAS_W = width || 600;
+    localStorage.setItem('canvas-width', width);
     TILE_W = CANVAS_W / (2 + (.75 * VIEW_RANGE * 2));
     TILE_H = Math.sqrt(3)/2 * TILE_W;
     CANVAS_H = TILE_H * 2 * (VIEW_RANGE + 1);
@@ -116,12 +145,14 @@ function setCanvasWidth(width) {
 }
 
 function setQwerty(toggle) {
-    if(toggle) {
+    if(toggle == 1) {
         keyBind = qwerty;
-        return 'keybinding set to qwerty';
+        localStorage.setItem('qwerty', 1);
+        return localStorage.getItem('qwerty');
     } else {
         keyBind = dvorak;
-        return 'keybinding set to dvorak';
+        localStorage.setItem('qwerty', 0);
+        return localStorage.getItem('qwerty');
     }
 }
 
@@ -137,8 +168,8 @@ function draw() {
             if(terrain) {
                 xRel = x - origin;
                 yRel = y - origin;
-                xDraw = xStart + (xRel * (.75 * TILE_W)); 
-                yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H); 
+                xDraw = xStart + (xRel * (.75 * TILE_W));
+                yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H);
                 ctx.drawImage(tiles[terrain], xDraw, yDraw, TILE_W, TILE_H);
                 if(view[x][y].player) {
                     ctx.drawImage(tiles.player, xDraw, yDraw, TILE_W, TILE_H);
@@ -150,10 +181,12 @@ function draw() {
 
 //start game
 $(document).ready(function() {
+    $('#nickname').val(localStorage.getItem('login'));
     $('#login').submit(function(e) {
         e.preventDefault();
         socket.emit('login', $('#nickname').val(), function(data) {
             if(data) {
+                localStorage.setItem('login', data.login);
                 $('#loginDiv').hide();
                 $('#gameDiv').show();
                 init(data);
@@ -173,10 +206,10 @@ $(document).ready(function() {
 <body>
 
 <div id="loginDiv" style="margin:50px;">
-    <div style='float:left;'>Enter a username:</div>
     <form id="login">
-        <input style="width:150px;" id="nickname">
-        <input type="submit">
+        <span>Enter a username:</span>
+        <input style="width:150px;" id="nickname" style="margin-left:5px;">
+        <input type="submit" value="Login">
     </form>
 </div>
 
