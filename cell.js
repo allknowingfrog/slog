@@ -3,9 +3,10 @@ module.exports = function(x, y, terrain, validCoords) {
     this.y = y;
     this.terrain;
     this.passable;
-    this.structure;
+    this.object = {};
     this.player;
     this.outside;
+    this.lit;
 
     this.makeTerrain = function(terrain) {
         switch(terrain) {
@@ -13,21 +14,25 @@ module.exports = function(x, y, terrain, validCoords) {
                 this.terrain = terrain;
                 this.passable = true;
                 this.outside = true;
+                this.lit = true;
                 break;
             case "water":
                 this.terrain = terrain;
                 this.passable = false;
                 this.outside = true;
+                this.lit = true;
                 break;
             case "wall":
                 this.terrain = terrain;
                 this.passable = false;
                 this.outside = false;
+                this.lit = false;
                 break;
             case "cave":
                 this.terrain = terrain;
                 this.passable = true;
                 this.outside = false;
+                this.lit = false;
                 break;
         }
     };
@@ -46,6 +51,18 @@ module.exports = function(x, y, terrain, validCoords) {
             }
         } else {
             return false;
+        }
+    };
+
+    this.checkLit = function() {
+        this.lit = false;
+        var xx, yy;
+        for(var dir in dirs) {
+            xx = this.x + dir.x;
+            yy = this.y + dir.y;
+            if(map[xx][yy].outside || map[xx][yy].object.lightSource) {
+                this.lit = true;
+            }
         }
     };
 
