@@ -9,7 +9,7 @@ body {
 }
 canvas {
     display: block;
-    margin: 30px auto 0;
+    margin: auto;
     background: black;
 }
 </style>
@@ -25,11 +25,15 @@ var ctx;
 
 var TILE_W;
 var TILE_H;
+
+var VIEW_RANGE;
 var view;
 var dirs;
 
+var keyBind;
+
 //dvorak homerow
-var keyBind = {
+var dvorak = {
     nw: 44, //,
     n: 46, //.
     ne: 112, //p
@@ -41,7 +45,22 @@ var keyBind = {
     water: 50, //2
     wall: 51, //3
     cave: 52 //4
-}
+};
+
+//qwerty homerow
+var qwerty = {
+    nw: 119, //w
+    n: 101, //e
+    ne: 114, //r
+    se: 102, //f
+    s: 100, //d
+    sw: 115, //s
+    action: 32, //space
+    land: 49, //1
+    water: 50, //2
+    wall: 51, //3
+    cave: 52 //4
+};
 
 var tiles = {
     player: new Image(),
@@ -69,12 +88,16 @@ function keyPress(key) {
 
 //init functions
 function init(data) {
-    CANVAS_W = data.CANVAS_W;
-    CANVAS_H = data.CANVAS_H;
-    TILE_W = data.TILE_W;
-    TILE_H = Math.sqrt(3)/2 * TILE_W;
+    VIEW_RANGE = data.VIEW_RANGE;
     dirs = data.dirs;
     view = data.view;
+
+    CANVAS_W = 600
+    TILE_W = CANVAS_W / (2 + (.75 * VIEW_RANGE * 2));
+    TILE_H = Math.sqrt(3)/2 * TILE_W;
+    CANVAS_H = TILE_H * 2 * (VIEW_RANGE + 1);
+
+    keyBind = dvorak;
 
     canvas = document.getElementById('canvas');
     canvas.width = CANVAS_W;

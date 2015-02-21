@@ -11,11 +11,8 @@ var cell = require('./cell.js');
 users = {};
 players = {};
 
-CANVAS_W = 600;
-CANVAS_H = 600;
-TILE_W = 50;
 MAP_SIZE = 101;
-VIEW_RANGE = 6;
+VIEW_RANGE = 9;
 INSIDE_RANGE = 2;
 
 TPS = 20;
@@ -63,9 +60,7 @@ io.sockets.on('connection', function(socket) {
             players[socket.nickname] = new player(socket.nickname, 5, 5, validCoords);
             var view = players[socket.nickname].getView();
             callback({
-                CANVAS_W: CANVAS_W,
-                CANVAS_H: CANVAS_H,
-                TILE_W: TILE_W,
+                VIEW_RANGE: VIEW_RANGE,
                 dirs: dirs,
                 view: view
             });
