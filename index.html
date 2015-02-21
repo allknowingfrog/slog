@@ -92,22 +92,37 @@ function init(data) {
     dirs = data.dirs;
     view = data.view;
 
-    CANVAS_W = 600
-    TILE_W = CANVAS_W / (2 + (.75 * VIEW_RANGE * 2));
-    TILE_H = Math.sqrt(3)/2 * TILE_W;
-    CANVAS_H = TILE_H * 2 * (VIEW_RANGE + 1);
-
     keyBind = dvorak;
 
     canvas = document.getElementById('canvas');
-    canvas.width = CANVAS_W;
-    canvas.height = CANVAS_H;
     ctx = canvas.getContext('2d');
+
+    setCanvasWidth(600);
 
     $(document).keypress(function(e) {
         e.preventDefault();
         keyPress(e.which);
     }); 
+}
+
+function setCanvasWidth(width) {
+    CANVAS_W = width;
+    TILE_W = CANVAS_W / (2 + (.75 * VIEW_RANGE * 2));
+    TILE_H = Math.sqrt(3)/2 * TILE_W;
+    CANVAS_H = TILE_H * 2 * (VIEW_RANGE + 1);
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
+    return "canvas width set: " + width;
+}
+
+function setQwerty(toggle) {
+    if(toggle) {
+        keyBind = qwerty;
+        return 'keybinding set to qwerty';
+    } else {
+        keyBind = dvorak;
+        return 'keybinding set to dvorak';
+    }
 }
 
 function draw() {
