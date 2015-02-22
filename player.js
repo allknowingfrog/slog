@@ -10,15 +10,17 @@ module.exports = function(nickname, cell, validCoords) {
         var x = this.cell.x;
         var y = this.cell.y;
         var xRel, yRel;
-        for(var xx=x-VIEW_RANGE; xx<=x+VIEW_RANGE; xx++) {
+        for(var xx=x-MAX_VIEW; xx<=x+MAX_VIEW; xx++) {
             xRel = view.length;
             view[xRel] = [];
-            for(var yy=y-VIEW_RANGE; yy<=y+VIEW_RANGE; yy++) {
+            for(var yy=y-MAX_VIEW; yy<=y+MAX_VIEW; yy++) {
                 yRel = view[xRel].length;
                 view[xRel][yRel] = {};
-                if(Math.abs(xRel-yRel) <= VIEW_RANGE && validCoords(xx, yy)) {
-                    if(map[xx][yy].lit || (xx >= x-INSIDE_RANGE && xx <= x+INSIDE_RANGE && yy >= y-INSIDE_RANGE && yy <= y+INSIDE_RANGE && Math.abs(xRel-yRel) <= INSIDE_RANGE)) {
-                        view[xRel][yRel].terrain = map[xx][yy].terrain;
+                if(Math.abs(xRel-yRel) <= MAX_VIEW && validCoords(xx, yy)) {
+                    if(map[xx][yy].lit || (xx >= x-MIN_VIEW && xx <= x+MIN_VIEW && yy >= y-MIN_VIEW && yy <= y+MIN_VIEW && Math.abs(xRel-yRel) <= MIN_VIEW)) {
+                        view[xRel][yRel].outside = map[xx][yy].outside;
+                        view[xRel][yRel].structure = map[xx][yy].structure.type;
+                        view[xRel][yRel].level = map[xx][yy].structure.level;
                         if(map[xx][yy].player) view[xRel][yRel].player = true;
                     }
                 }
@@ -31,9 +33,7 @@ module.exports = function(nickname, cell, validCoords) {
     this.getInventory = function() {
         var inv = [];
         for(var i=0; i<this.inventory.length; i++) {
-            if(this.inventory[i].id == 'shovel') {
-                inv[inv.length] = this.inventory[i].terrain;
-            }
+            inv[inv.length] = this.inventory[i].id;
         }
 
         return inv;

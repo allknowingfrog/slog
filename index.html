@@ -24,7 +24,7 @@ var ctx = {};
 var TILE_W;
 var TILE_H;
 
-var VIEW_RANGE;
+var MAX_VIEW;
 var view;
 var dirs;
 var action;
@@ -89,18 +89,20 @@ var qwerty = {
 
 var tiles = {
     player: new Image(),
-    land: new Image(),
+    soil: new Image(),
     water: new Image(),
-    wall: new Image(),
-    cave: new Image(),
-    woods: new Image()
+    grass: new Image(),
+    woods: new Image(),
+    stone: new Image(),
+    shovel: new Image()
 };
 tiles.player.src = 'player.svg';
-tiles.land.src = 'land.svg';
+tiles.soil.src = 'soil.svg';
 tiles.water.src = 'water.svg';
-tiles.wall.src = 'wall.svg';
-tiles.cave.src = 'cave.svg';
+tiles.grass.src = 'grass.svg';
 tiles.woods.src = 'woods.svg';
+tiles.stone.src = 'stone.svg';
+tiles.shovel.src = 'redHex.svg';
 
 function keyPress(key) {
     var aBinds = keyBind.actions;
@@ -140,7 +142,7 @@ function keyPress(key) {
 
 //init functions
 function init(data) {
-    VIEW_RANGE = data.VIEW_RANGE;
+    MAX_VIEW = data.MAX_VIEW;
     dirs = data.dirs;
     view = data.view;
 
@@ -163,9 +165,9 @@ function init(data) {
 function setCanvasWidth(width) {
     CANVAS_W = width || 600;
     localStorage.setItem('canvas-width', width);
-    TILE_W = CANVAS_W / (2 + (.75 * VIEW_RANGE * 2));
+    TILE_W = CANVAS_W / (2 + (.75 * MAX_VIEW * 2));
     TILE_H = Math.sqrt(3)/2 * TILE_W;
-    CANVAS_H = TILE_H * 2 * (VIEW_RANGE + 1);
+    CANVAS_H = TILE_H * 2 * (MAX_VIEW + 1);
 
     canvas.main.width = CANVAS_W;
     canvas.main.height = CANVAS_H;
@@ -191,17 +193,39 @@ function draw() {
     var xStart = (CANVAS_W / 2) - (TILE_W / 2);
     var yStart = (CANVAS_H / 2) - (TILE_H / 2);
     var origin = Math.floor(view.length/2);
-    var terrain, player, xRel, yRel, xDraw, yDraw;
+    var structure, tile, player, xRel, yRel, xDraw, yDraw;
     ctx.main.clearRect(0, 0, CANVAS_W, CANVAS_H);
     for(var x=0; x<view.length; x++) {
         for(var y=0; y<view.length; y++) {
-            terrain = view[x][y].terrain;
-            if(terrain) {
+            structure = view[x][y].structure;
+            if(structure) {
+                switch(structure) {
+                    case 'soil':
+                        switch(view[x][y].level) {
+                            case 0:
+                                tile = tiles.soil;
+                                break;
+                            case 1:
+                                tile = tiles.grass;
+                                break;
+                            case 2:
+                                tile = tiles.woods;
+                                break;
+                        }
+                        break;
+                    case 'water':
+                        tile = tiles.water;
+                        break;
+                    case 'stone':
+                        tile = tiles.stone;
+                        break;
+                }
+
                 xRel = x - origin;
                 yRel = y - origin;
                 xDraw = xStart + (xRel * (.75 * TILE_W));
                 yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H);
-                ctx.main.drawImage(tiles[terrain], xDraw, yDraw, TILE_W, TILE_H);
+                ctx.main.drawImage(tile, xDraw, yDraw, TILE_W, TILE_H);
                 if(view[x][y].player) {
                     ctx.main.drawImage(tiles.player, xDraw, yDraw, TILE_W, TILE_H);
                 }
@@ -213,8 +237,8 @@ function draw() {
     yDraw = TILE_H / 2;
     ctx.inv.clearRect(0, 0, TILE_W * 2, CANVAS_H);
     for(var i=0; i<inventory.length; i++) {
-        terrain = inventory[i];
-        ctx.inv.drawImage(tiles[terrain], xDraw, yDraw, TILE_W, TILE_H);
+        structure = inventory[i];
+        ctx.inv.drawImage(tiles[structure], xDraw, yDraw, TILE_W, TILE_H);
         yDraw += TILE_H;
     }
     ctx.inv.drawImage(tiles.player, xDraw, (TILE_H / 2) + (TILE_H * inv), TILE_W, TILE_H);

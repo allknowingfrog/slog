@@ -6,15 +6,23 @@ var fs = require('fs');
 
 var player = require('./player.js');
 var cell = require('./cell.js');
-var shovel = require('./shovel.js');
+
+//structures
+var soil = require('./structures/soil.js');
+var water = require('./structures/water.js');
+var stone = require('./structures/stone.js');
+
+//objects
+var shovel = require('./objects/shovel.js');
 
 //globals
 users = {};
 players = {};
 
 MAP_SIZE = 101;
-VIEW_RANGE = 9;
-INSIDE_RANGE = 2;
+MAX_VIEW = 9;
+MIN_VIEW = 2;
+LIGHT_RANGE = 2;
 
 TPS = 20;
 
@@ -31,7 +39,7 @@ map = [];
 for(var x=0; x<MAP_SIZE; x++) {
     map[x] = [];
     for(var y=0; y<MAP_SIZE; y++) {
-        map[x][y] = new cell(x, y, "land", validCoords);
+        map[x][y] = new cell(x, y, soil, validCoords);
     }
 }
 
@@ -60,16 +68,13 @@ io.sockets.on('connection', function(socket) {
             users[socket.nickname] = socket;
             players[socket.nickname] = new player(socket.nickname, map[5][5], validCoords);
             var p = players[socket.nickname];
-            p.invAdd(new shovel('land'));
-            p.invAdd(new shovel('water'));
-            p.invAdd(new shovel('wall'));
-            p.invAdd(new shovel('cave'));
-            p.invAdd(new shovel('woods'));
+            p.invAdd(new shovel(water));
+            p.invAdd(new shovel(stone));
             var view = players[socket.nickname].getView();
             var inventory = players[socket.nickname].getInventory();
             callback({
                 login: data,
-                VIEW_RANGE: VIEW_RANGE,
+                MAX_VIEW: MAX_VIEW,
                 dirs: dirs,
                 view: view,
                 inventory: inventory
