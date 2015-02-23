@@ -1,4 +1,4 @@
-module.exports = function(nickname, cell, validCoords) {
+module.exports = function(nickname, cell) {
     this.nickname = nickname;
     this.cell = cell;
     this.cell.player = this;
@@ -16,7 +16,7 @@ module.exports = function(nickname, cell, validCoords) {
             for(var yy=y-MAX_VIEW; yy<=y+MAX_VIEW; yy++) {
                 yRel = view[xRel].length;
                 view[xRel][yRel] = {};
-                if(Math.abs(xRel-yRel) <= MAX_VIEW && validCoords(xx, yy)) {
+                if(Math.abs(xRel-yRel) <= MAX_VIEW && this.cell.validCoords(xx, yy)) {
                     if(map[xx][yy].lit || (xx >= x-MIN_VIEW && xx <= x+MIN_VIEW && yy >= y-MIN_VIEW && yy <= y+MIN_VIEW && Math.abs(xRel-yRel) <= MIN_VIEW)) {
                         view[xRel][yRel].outside = map[xx][yy].outside;
                         view[xRel][yRel].structure = map[xx][yy].structure.type;
@@ -47,7 +47,7 @@ module.exports = function(nickname, cell, validCoords) {
             if(dir) {
                 var xx = this.cell.x + dir.x;
                 var yy = this.cell.y + dir.y;
-                if(validCoords(xx, yy)) {
+                if(this.cell.validCoords(xx, yy)) {
                     if(action == 'move') {
                         map[this.cell.x][this.cell.y].sendPlayer(xx, yy);
                     } else if(action == 'use') {

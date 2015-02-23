@@ -1,7 +1,11 @@
-module.exports = function(x, y, structure, validCoords) {
+module.exports = function(x, y) {
+    this.soil = require('./structures/soil.js');
+    this.water = require('./structures/water.js');
+    this.stone = require('./structures/stone.js');
+
     this.x = x;
     this.y = y;
-    this.structure = new structure(this);
+    this.structure = new this.soil(this);
     this.object = {};
     this.player;
 
@@ -9,13 +13,23 @@ module.exports = function(x, y, structure, validCoords) {
     this.lit = true;
 
     this.makeStructure = function(structure) {
-        this.structure = new structure(this);
+        switch(structure) {
+            case 'soil':
+                this.structure = new this.soil(this);
+                break;
+            case 'water':
+                this.structure = new this.water(this);
+                break;
+            case 'stone':
+                this.structure = new this.stone(this);
+                break;
+        }
         this.checkLit();
         var xx, yy;
         for(var dir in dirs) {
             xx = this.x + dirs[dir].x;
             yy = this.y + dirs[dir].y;
-            if(validCoords(xx, yy)) map[xx][yy].checkLit();
+            if(this.validCoords(xx, yy)) map[xx][yy].checkLit();
         }
         var neighbors = this.getNeighbors(LIGHT_RANGE);
         for(var n in neighbors) {
@@ -24,7 +38,7 @@ module.exports = function(x, y, structure, validCoords) {
     };
 
     this.sendPlayer = function(x, y) {
-        if(validCoords(x, y)) {
+        if(this.validCoords(x, y)) {
             var dest = map[x][y];
             if(dest.structure.passable && !dest.player) {
                 dest.player = this.player;
@@ -56,7 +70,7 @@ module.exports = function(x, y, structure, validCoords) {
         var yRel = 0;
         for(var xx=this.x-range; xx<=this.x+range; xx++) {
             for(var yy=this.y-range; yy<=this.y+range; yy++) {
-                if(Math.abs(xRel-yRel) <= range && validCoords(xx, yy)) {
+                if(Math.abs(xRel-yRel) <= range && this.validCoords(xx, yy)) {
                     neighbors[neighbors.length] = map[xx][yy];
                 }
                 yRel++;
@@ -65,5 +79,13 @@ module.exports = function(x, y, structure, validCoords) {
             xRel++;
         }
         return neighbors;
+    };
+
+    this.validCoords = function(x, y) {
+        if(x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE) {
+            return true;
+        } else {
+            return false;
+        }
     };
 }

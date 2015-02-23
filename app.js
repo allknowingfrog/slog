@@ -7,11 +7,6 @@ var fs = require('fs');
 var player = require('./player.js');
 var cell = require('./cell.js');
 
-//structures
-var soil = require('./structures/soil.js');
-var water = require('./structures/water.js');
-var stone = require('./structures/stone.js');
-
 //objects
 var shovel = require('./objects/shovel.js');
 
@@ -39,15 +34,7 @@ map = [];
 for(var x=0; x<MAP_SIZE; x++) {
     map[x] = [];
     for(var y=0; y<MAP_SIZE; y++) {
-        map[x][y] = new cell(x, y, soil, validCoords);
-    }
-}
-
-function validCoords(x, y) {
-    if(x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE) {
-        return true;
-    } else {
-        return false;
+        map[x][y] = new cell(x, y);
     }
 }
 
@@ -66,10 +53,10 @@ io.sockets.on('connection', function(socket) {
         } else if(data) {
             socket.nickname = data;
             users[socket.nickname] = socket;
-            players[socket.nickname] = new player(socket.nickname, map[5][5], validCoords);
+            players[socket.nickname] = new player(socket.nickname, map[5][5]);
             var p = players[socket.nickname];
-            p.invAdd(new shovel(water));
-            p.invAdd(new shovel(stone));
+            p.invAdd(new shovel('water'));
+            p.invAdd(new shovel('stone'));
             var view = players[socket.nickname].getView();
             var inventory = players[socket.nickname].getInventory();
             callback({
