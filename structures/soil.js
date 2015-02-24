@@ -26,8 +26,8 @@ module.exports = function(cell, level) {
     };
 
     this.checkOutside = function() {
-        if(this.level) this.cell.outside = false;
-        else this.cell.outside = true;
+        if(this.level) this.cell.outside = true;
+        else this.cell.outside = false;
     };
 
     this.checkOutside();
