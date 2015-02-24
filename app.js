@@ -55,8 +55,8 @@ io.sockets.on('connection', function(socket) {
             users[socket.nickname] = socket;
             players[socket.nickname] = new player(socket.nickname, map[5][5]);
             var p = players[socket.nickname];
-            p.invAdd(new shovel('water'));
-            p.invAdd(new shovel('stone'));
+            p.invAdd(new shovel(false));
+            p.invAdd(new shovel(true));
             var view = players[socket.nickname].getView();
             var inventory = players[socket.nickname].getInventory();
             callback({

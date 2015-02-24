@@ -12,10 +12,10 @@ module.exports = function(x, y) {
     this.outside = true;
     this.lit = true;
 
-    this.makeStructure = function(structure) {
+    this.makeStructure = function(structure, level) {
         switch(structure) {
             case 'soil':
-                this.structure = new this.soil(this);
+                this.structure = new this.soil(this, level);
                 break;
             case 'water':
                 this.structure = new this.water(this);
@@ -34,6 +34,36 @@ module.exports = function(x, y) {
         var neighbors = this.getNeighbors(LIGHT_RANGE);
         for(var n in neighbors) {
             neighbors[n].checkLit();
+        }
+    };
+
+    this.raiseTerrain = function() {
+        switch(this.structure.type) {
+            case 'water':
+                this.makeStructure('soil', 1);
+                break;
+            case 'soil':
+                if(this.structure.level == 1) {
+                    this.makeStructure('soil', 0);
+                } else {
+                    this.makeStructure('stone');
+                }
+                break;
+        }
+    };
+
+    this.lowerTerrain = function() {
+        switch(this.structure.type) {
+            case 'stone':
+                this.makeStructure('soil', 0);
+                break;
+            case 'soil':
+                if(this.structure.level == 0) {
+                    this.makeStructure('soil', 1);
+                } else {
+                    this.makeStructure('water');
+                }
+                break;
         }
     };
 

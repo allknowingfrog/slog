@@ -1,8 +1,9 @@
-module.exports = function(cell) {
+module.exports = function(cell, level) {
     this.type = 'soil';
     this.cell = cell;
     this.passable = true;
-    this.level = 1;
+    this.level = level;
+    if(!this.level && this.level != 0) this.level = 1;
 
     this.grow = function() {
         if(this.level <= 2) {
@@ -11,6 +12,7 @@ module.exports = function(cell) {
                 this.passable = false;
             }
         }
+        this.checkOutside();
     };
 
     this.shrink = function() {
@@ -20,7 +22,13 @@ module.exports = function(cell) {
                 this.passable = true;
             }
         }
+        this.checkOutside();
     };
 
-    this.cell.outside = true;
+    this.checkOutside = function() {
+        if(this.level) this.cell.outside = false;
+        else this.cell.outside = true;
+    };
+
+    this.checkOutside();
 };

@@ -1,7 +1,9 @@
-module.exports = function(structure) {
+module.exports = function(build) {
     this.id = 'shovel';
+    this.build = build;
 
     this.use = function(cell) {
-        cell.makeStructure(structure);
+        if(this.build) cell.raiseTerrain();
+        else cell.lowerTerrain();
     };
 }
