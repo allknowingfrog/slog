@@ -69,24 +69,30 @@ module.exports = function(x, y) {
     };
 
     this.checkLit = function(checkNeighbors) {
-        this.lit = false;
-        if(this.outside) {
-            this.lit = true;
-            return;
-        }
         var neighbors = this.getNeighbors(LIGHT_RANGE);
-        var neighbor;
-        for(var n in neighbors) {
-            neighbor = neighbors[n];
-            if(neighbor.outside || (neighbor.item && neighbor.item.lightSource)) {
-                this.lit = true;
-                break;
+        this.lit = false;
+        if(this.isLightSource()) {
+            this.lit = true;
+        } else {
+            for(var n in neighbors) {
+                if(neighbors[n].isLightSource()) {
+                    this.lit = true;
+                    break;
+                }
             }
         }
         if(checkNeighbors) {
             for(var n in neighbors) {
                 neighbors[n].checkLit();
             }
+        }
+    };
+
+    this.isLightSource = function() {
+        if(this.outside || (this.item && this.item.lightSource)) {
+            return true;
+        } else {
+            return false;
         }
     };
 
