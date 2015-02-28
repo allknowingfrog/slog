@@ -22,6 +22,7 @@ module.exports = function(nickname, cell) {
                         view[xRel][yRel].structure = map[xx][yy].structure.type;
                         view[xRel][yRel].level = map[xx][yy].structure.level;
                         if(map[xx][yy].player) view[xRel][yRel].player = true;
+                        if(map[xx][yy].item) view[xRel][yRel].item = true;
                     }
                 }
             }
@@ -42,16 +43,19 @@ module.exports = function(nickname, cell) {
     this.move = function() {
         if(this.nextMove) {
             var action = this.nextMove.action;
-            var dir = dirs[this.nextMove.dir];
-            var inv = this.nextMove.inv;
+            var dir = this.nextMove.dir;
             if(dir) {
-                var xx = this.cell.x + dir.x;
-                var yy = this.cell.y + dir.y;
-                if(this.cell.validCoords(xx, yy)) {
+                var target = this.cell.getNeighbor(dir);
+                if(target) {
                     if(action == 'move') {
-                        map[this.cell.x][this.cell.y].sendPlayer(xx, yy);
+                        if(this.cell.sendPlayer(target)) {
+                            if(this.cell.item) this.grabItem();
+                        }
                     } else if(action == 'use') {
-                        if(this.inventory[inv]) this.inventory[inv].use(map[xx][yy]);
+                        var inv = this.inventory[this.nextMove.inv];
+                        if(inv) inv.use(target);
+                    } else if(action == 'toss') {
+                        this.tossItem(this.nextMove.inv, dir);
                     }
                 }
             }
@@ -59,7 +63,19 @@ module.exports = function(nickname, cell) {
         }
     };
 
-    this.invAdd = function(obj) {
-        this.inventory[this.inventory.length] = obj;
+    this.grabItem = function() {
+        this.inventory[this.inventory.length] = this.cell.giveItem();
+    };
+
+    this.tossItem = function(itemIndex, dir) {
+        var target = this.cell.getNeighbor(dir);
+
+        if(target.receiveItem(this.inventory[itemIndex])) {
+            this.inventory.splice(itemIndex, 1);
+        }
+    };
+
+    this.invAdd = function(item) {
+        this.inventory[this.inventory.length] = item;
     };
 }

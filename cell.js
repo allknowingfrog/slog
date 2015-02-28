@@ -6,7 +6,7 @@ module.exports = function(x, y) {
     this.x = x;
     this.y = y;
     this.structure = new this.soil(this);
-    this.object = {};
+    this.item;
     this.player;
 
     this.outside = true;
@@ -24,17 +24,7 @@ module.exports = function(x, y) {
                 this.structure = new this.stone(this);
                 break;
         }
-        this.checkLit();
-        var xx, yy;
-        for(var dir in dirs) {
-            xx = this.x + dirs[dir].x;
-            yy = this.y + dirs[dir].y;
-            if(this.validCoords(xx, yy)) map[xx][yy].checkLit();
-        }
-        var neighbors = this.getNeighbors(LIGHT_RANGE);
-        for(var n in neighbors) {
-            neighbors[n].checkLit();
-        }
+        this.checkLit(true);
     };
 
     this.raiseTerrain = function() {
@@ -67,28 +57,35 @@ module.exports = function(x, y) {
         }
     };
 
-    this.sendPlayer = function(x, y) {
-        if(this.validCoords(x, y)) {
-            var dest = map[x][y];
-            if(dest.structure.passable && !dest.player) {
-                dest.player = this.player;
-                this.player.cell = dest;
-                this.player = null;
-            }
+    this.sendPlayer = function(dest) {
+        if(dest && dest.structure.passable && !dest.player) {
+            dest.player = this.player;
+            this.player.cell = dest;
+            this.player = null;
+            return true;
+        } else {
+            return false;
         }
     };
 
-    this.checkLit = function() {
+    this.checkLit = function(checkNeighbors) {
         this.lit = false;
         if(this.outside) {
             this.lit = true;
             return;
         }
         var neighbors = this.getNeighbors(LIGHT_RANGE);
+        var neighbor;
         for(var n in neighbors) {
-            if(neighbors[n].outside || neighbors[n].object.lightSource) {
+            neighbor = neighbors[n];
+            if(neighbor.outside || (neighbor.item && neighbor.item.lightSource)) {
                 this.lit = true;
-                return;
+                break;
+            }
+        }
+        if(checkNeighbors) {
+            for(var n in neighbors) {
+                neighbors[n].checkLit();
             }
         }
     };
@@ -109,6 +106,33 @@ module.exports = function(x, y) {
             xRel++;
         }
         return neighbors;
+    };
+
+    this.getNeighbor = function(dir) {
+        var x = this.x + dirs[dir].x;
+        var y = this.y + dirs[dir].y;
+        if(this.validCoords(x, y)) {
+            return map[x][y];
+        } else {
+            return false;
+        }
+    };
+
+    this.receiveItem = function(item) {
+        if(this.item) {
+            return false;
+        } else {
+            this.item = item;
+            this.checkLit(true);
+            return true;
+        }
+    };
+
+    this.giveItem = function() {
+        var tmp = this.item;
+        this.item = null;
+        this.checkLit(true);
+        return tmp;
     };
 
     this.validCoords = function(x, y) {

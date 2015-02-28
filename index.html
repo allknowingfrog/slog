@@ -36,7 +36,8 @@ var keyBind;
 //dvorak homerow
 var dvorak = {
     actions: {
-        use: 32 //space
+        use: 32, //space
+        toss: 116 //toss
     },
     dirs: {
         nw: 44, //,
@@ -44,7 +45,8 @@ var dvorak = {
         ne: 112, //p
         se: 117, //u
         s: 101, //e
-        sw: 111 //a
+        sw: 111, //a
+        here: 104 //h
     },
     inventory: {
         0: 49, //1
@@ -63,7 +65,8 @@ var dvorak = {
 //qwerty homerow
 var qwerty = {
     actions: {
-        use: 32 //space
+        use: 32, //space
+        toss: 116 //toss
     },
     dirs: {
         nw: 119, //w
@@ -71,7 +74,8 @@ var qwerty = {
         ne: 114, //r
         se: 102, //f
         s: 100, //d
-        sw: 115 //s
+        sw: 115, //s
+        here: 104 //h
     },
     inventory: {
         0: 49, //1
@@ -94,7 +98,9 @@ var tiles = {
     grass: new Image(),
     woods: new Image(),
     stone: new Image(),
-    shovel: new Image()
+    item: new Image(),
+    shovel: new Image(),
+    torch: new Image()
 };
 tiles.player.src = 'player.svg';
 tiles.soil.src = 'soil.svg';
@@ -102,7 +108,9 @@ tiles.water.src = 'water.svg';
 tiles.grass.src = 'grass.svg';
 tiles.woods.src = 'woods.svg';
 tiles.stone.src = 'stone.svg';
+tiles.item.src = 'item.svg';
 tiles.shovel.src = 'redHex.svg';
+tiles.torch.src = 'redHex.svg';
 
 function keyPress(key) {
     var aBinds = keyBind.actions;
@@ -226,6 +234,9 @@ function draw() {
                 xDraw = xStart + (xRel * (.75 * TILE_W));
                 yDraw = yStart + ((yRel - (xRel / 2)) * TILE_H);
                 ctx.main.drawImage(tile, xDraw, yDraw, TILE_W, TILE_H);
+                if(view[x][y].item) {
+                    ctx.main.drawImage(tiles.item, xDraw, yDraw, TILE_W, TILE_H);
+                }
                 if(view[x][y].player) {
                     ctx.main.drawImage(tiles.player, xDraw, yDraw, TILE_W, TILE_H);
                 }

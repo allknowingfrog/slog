@@ -7,8 +7,9 @@ var fs = require('fs');
 var player = require('./player.js');
 var cell = require('./cell.js');
 
-//objects
-var shovel = require('./objects/shovel.js');
+//items
+var shovel = require('./items/shovel.js');
+var torch = require('./items/torch.js');
 
 //globals
 users = {};
@@ -22,12 +23,13 @@ LIGHT_RANGE = 2;
 TPS = 20;
 
 dirs = {
-    nw: {x: -1,  y: -1},
-    n:  {x:  0,  y: -1},
-    ne: {x:  1,  y:  0},
-    se: {x:  1,  y:  1},
-    s:  {x:  0,  y:  1},
-    sw: {x: -1,  y:  0}
+    nw:   {x: -1,  y: -1},
+    n:    {x:  0,  y: -1},
+    ne:   {x:  1,  y:  0},
+    se:   {x:  1,  y:  1},
+    s:    {x:  0,  y:  1},
+    sw:   {x: -1,  y:  0},
+    here: {x:  0,  y:  0}
 };
 
 map = [];
@@ -37,6 +39,8 @@ for(var x=0; x<MAP_SIZE; x++) {
         map[x][y] = new cell(x, y);
     }
 }
+
+map[0][0].item = new torch();
 
 server.listen(3000);
 
