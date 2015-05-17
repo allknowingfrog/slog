@@ -103,7 +103,7 @@ module.exports = function(x, y) {
         var yRel = 0;
         for(var xx=this.x-range; xx<=this.x+range; xx++) {
             for(var yy=this.y-range; yy<=this.y+range; yy++) {
-                if(Math.abs(xRel-yRel) <= range && this.validCoords(xx, yy)) {
+                if(xRel+yRel >= range && xRel+yRel < (range*3)+1 && this.validCoords(xx, yy)) {
                     neighbors[neighbors.length] = map[xx][yy];
                 }
                 yRel++;

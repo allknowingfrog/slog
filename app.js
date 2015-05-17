@@ -23,12 +23,12 @@ LIGHT_RANGE = 2;
 TPS = 20;
 
 dirs = {
-    nw:   {x: -1,  y: -1},
     n:    {x:  0,  y: -1},
-    ne:   {x:  1,  y:  0},
-    se:   {x:  1,  y:  1},
+    ne:   {x:  1,  y: -1},
+    se:   {x:  1,  y:  0},
     s:    {x:  0,  y:  1},
-    sw:   {x: -1,  y:  0},
+    sw:   {x: -1,  y:  1},
+    nw:   {x: -1,  y:  0},
     here: {x:  0,  y:  0}
 };
 
@@ -44,7 +44,7 @@ map[0][0].item = new torch();
 
 server.listen(3000);
 
-app.use(express.static(__dirname + '/sprites'));
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');

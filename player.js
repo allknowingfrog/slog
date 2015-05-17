@@ -9,6 +9,7 @@ module.exports = function(nickname, cell) {
         var view = [];
         var x = this.cell.x;
         var y = this.cell.y;
+        var offset = Math.floor((MAX_VIEW-MIN_VIEW));
         var xRel, yRel;
         for(var xx=x-MAX_VIEW; xx<=x+MAX_VIEW; xx++) {
             xRel = view.length;
@@ -16,8 +17,8 @@ module.exports = function(nickname, cell) {
             for(var yy=y-MAX_VIEW; yy<=y+MAX_VIEW; yy++) {
                 yRel = view[xRel].length;
                 view[xRel][yRel] = {};
-                if(Math.abs(xRel-yRel) <= MAX_VIEW && this.cell.validCoords(xx, yy)) {
-                    if(map[xx][yy].lit || (xx >= x-MIN_VIEW && xx <= x+MIN_VIEW && yy >= y-MIN_VIEW && yy <= y+MIN_VIEW && Math.abs(xRel-yRel) <= MIN_VIEW)) {
+                if(xRel+yRel >= MAX_VIEW && xRel+yRel < (MAX_VIEW*3)+1 && this.cell.validCoords(xx, yy)) {
+                    if(map[xx][yy].lit || (xx >= x-MIN_VIEW && xx <= x+MIN_VIEW && yy >= y-MIN_VIEW && yy <= y+MIN_VIEW && (xRel-offset)+(yRel-offset) >= MIN_VIEW && (xRel-offset)+(yRel-offset) < (MIN_VIEW*3)+1)) {
                         view[xRel][yRel].outside = map[xx][yy].outside;
                         view[xRel][yRel].structure = map[xx][yy].structure.type;
                         view[xRel][yRel].level = map[xx][yy].structure.level;
