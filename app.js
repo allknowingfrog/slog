@@ -7,20 +7,18 @@ var fs = require('fs');
 var player = require('./player.js');
 var cell = require('./cell.js');
 
-//items
-var shovel = require('./items/shovel.js');
-var torch = require('./items/torch.js');
-
 //globals
 users = {};
 players = {};
+updates = [];
 
 MAP_SIZE = 101;
 MAX_VIEW = 9;
-MIN_VIEW = 2;
-LIGHT_RANGE = 2;
 
 TPS = 20;
+COOL_DOWN = 500;
+
+running = false;
 
 dirs = {
     n:    {x:  0,  y: -1},
@@ -40,15 +38,7 @@ for(var x=0; x<MAP_SIZE; x++) {
     }
 }
 
-map[0][0].item = new torch();
-
 server.listen(3000);
-
-app.use(express.static(__dirname + '/public'));
-
-app.get('/', function(req, res){
-    res.sendFile(__dirname + '/index.html');
-});
 
 io.sockets.on('connection', function(socket) {
     socket.on('login', function(data, callback) {
@@ -58,24 +48,20 @@ io.sockets.on('connection', function(socket) {
             socket.nickname = data;
             users[socket.nickname] = socket;
             players[socket.nickname] = new player(socket.nickname, map[5][5]);
-            var p = players[socket.nickname];
-            p.invAdd(new shovel(false));
-            p.invAdd(new shovel(true));
             var view = players[socket.nickname].getView();
-            var inventory = players[socket.nickname].getInventory();
             callback({
                 login: data,
                 MAX_VIEW: MAX_VIEW,
                 dirs: dirs,
-                view: view,
-                inventory: inventory
+                view: view
             });
         } else {
             callback(false);
         }
     });
-    socket.on('keyPress', function(data) {
-        players[socket.nickname].nextMove = data;
+    socket.on('move', function(data) {
+        players[socket.nickname].bearing = data;
+        updates.push(player);
     });
     socket.on('disconnect', function(data) {
         if(socket.nickname) {
@@ -91,14 +77,18 @@ io.sockets.on('connection', function(socket) {
 setInterval(gameLoop, 1000/TPS);
 
 function gameLoop() {
-    for(var p in players) {
-        players[p].move();
+    var now = Date.now();
+
+    var player;
+    for(var p in updates) {
+        player = players[p];
+        if(player.initiative > now) {
+            player.move();
+            player.initiative = now + COOL_DOWN;
+        }
     }
 
-    var data = {};
     for(var p in players) {
-        data.view = players[p].getView();
-        data.inventory = players[p].getInventory();
-        users[p].emit('update', data);
+        users[p].emit('update', players[p].getView());
     }
 }
