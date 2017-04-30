@@ -12,8 +12,9 @@ canvas {
 }
 </style>
 <script src="/socket.io/socket.io.js"></script>
-<script src="jquery.js"></script>
-<script src="client.js"></script>
+<script src="/jquery.js"></script>
+<script src="/heil.js"></script>
+<script src="/client.js"></script>
 </head>
 <body>
 
@@ -26,10 +27,7 @@ canvas {
 </div>
 
 <div id="gameDiv" style="width:100%;display:none;">
-    <div>
-        <div style="float:right;"><canvas id="canvas"></canvas></div>
-        <div style="float:right;"><canvas id="invcan"></canvas></div>
-    </div>
+    <canvas id="canvas"></canvas>
 </div>
 
 <div id="output" style='width:100%;'></div>

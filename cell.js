@@ -5,8 +5,9 @@ module.exports = function(map, x, y) {
         return {x: x, y: y};
     };
 
-    this.sendPlayer = function(cell) {
-        if(cell.receivePlayer(player)) {
+    this.sendPlayer = function(x, y) {
+        var cell = map.at(x, y);
+        if(this.neighbor(cell) && cell.receivePlayer(player)) {
             player = null;
             return true;
         } else {
@@ -24,10 +25,9 @@ module.exports = function(map, x, y) {
         }
     };
 
-    this.neighbor = function(cell, dir) {
-        var x = cell.x + map.DIRS[dir].x;
-        var y = cell.y + map.DIRS[dir].y;
-        return map.at(x, y);
+    this.neighbor = function(cell) {
+        var a = cell.address();
+        return a.x - x + a.y - y <= 1;
     };
 
     this.view = function() {

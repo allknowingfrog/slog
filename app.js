@@ -12,14 +12,16 @@ users = {};
 players = {};
 
 MAP_SIZE = 7;
-VIEW_SIZE = 1;
+VIEW_SIZE = 2;
 
-TURN_LENGTH = 3;
+TURN_LENGTH = 5;
 
 map = new map(cell, MAP_SIZE, VIEW_SIZE);
-map.at(0, 0).encode();
+map.at(0, 0).view();
 
 server.listen(3000);
+
+console.log('Listening on 3000');
 
 app.use(express.static(__dirname + '/public'));
 
@@ -28,6 +30,7 @@ app.get('/', function(req, res){
 });
 
 io.sockets.on('connection', function(socket) {
+    console.log('New socket ' + socket.id);
     socket.on('login', function(data, callback) {
         if(data in users) {
             callback(false);
@@ -43,13 +46,14 @@ io.sockets.on('connection', function(socket) {
                 VIEW_SIZE: VIEW_SIZE,
                 TURN_LENGTH: TURN_LENGTH,
                 DIRS: map.DIRS,
-                view: p.view()
+                update: p.view()
             });
         } else {
             callback(false);
         }
     });
     socket.on('move', function(data) {
+        console.log('received move');
         players[socket.id].nextMove = data;
     });
     socket.on('disconnect', function(data) {
