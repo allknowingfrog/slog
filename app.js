@@ -2,45 +2,22 @@ var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
-var fs = require('fs');
 
-var player = require('./player.js');
+var map = require('./map.js');
 var cell = require('./cell.js');
-
-//items
-var shovel = require('./items/shovel.js');
-var torch = require('./items/torch.js');
+var player = require('./player.js');
 
 //globals
 users = {};
 players = {};
 
-MAP_SIZE = 101;
-MAX_VIEW = 9;
-MIN_VIEW = 2;
-LIGHT_RANGE = 2;
+MAP_SIZE = 7;
+VIEW_SIZE = 1;
 
-TPS = 20;
+TURN_LENGTH = 3;
 
-dirs = {
-    n:    {x:  0,  y: -1},
-    ne:   {x:  1,  y: -1},
-    se:   {x:  1,  y:  0},
-    s:    {x:  0,  y:  1},
-    sw:   {x: -1,  y:  1},
-    nw:   {x: -1,  y:  0},
-    here: {x:  0,  y:  0}
-};
-
-map = [];
-for(var x=0; x<MAP_SIZE; x++) {
-    map[x] = [];
-    for(var y=0; y<MAP_SIZE; y++) {
-        map[x][y] = new cell(x, y);
-    }
-}
-
-map[0][0].item = new torch();
+map = new map(cell, MAP_SIZE, VIEW_SIZE);
+map.at(0, 0).encode();
 
 server.listen(3000);
 
@@ -55,50 +32,43 @@ io.sockets.on('connection', function(socket) {
         if(data in users) {
             callback(false);
         } else if(data) {
-            socket.nickname = data;
-            users[socket.nickname] = socket;
-            players[socket.nickname] = new player(socket.nickname, map[5][5]);
-            var p = players[socket.nickname];
-            p.invAdd(new shovel(false));
-            p.invAdd(new shovel(true));
-            var view = players[socket.nickname].getView();
-            var inventory = players[socket.nickname].getInventory();
+            users[socket.id] = socket;
+            var p = new player(socket.id, data);
+            players[socket.id] = p;
+            //TODO better spawn
+            map.at(0, 0).receivePlayer(p);
             callback({
                 login: data,
-                MAX_VIEW: MAX_VIEW,
-                dirs: dirs,
-                view: view,
-                inventory: inventory
+                MAP_SIZE: MAP_SIZE,
+                VIEW_SIZE: VIEW_SIZE,
+                TURN_LENGTH: TURN_LENGTH,
+                DIRS: map.DIRS,
+                view: p.view()
             });
         } else {
             callback(false);
         }
     });
-    socket.on('keyPress', function(data) {
-        players[socket.nickname].nextMove = data;
+    socket.on('move', function(data) {
+        players[socket.id].nextMove = data;
     });
     socket.on('disconnect', function(data) {
-        if(socket.nickname) {
-            players[socket.nickname].cell.player = null;
-            delete users[socket.nickname];
-            delete players[socket.nickname];
-        } else {
-            return;
-        }
+        delete users[socket.id];
+        if(players.hasOwnProperty(socket.id)) {
+            players[socket.id].cell.player = null;
+            delete players[socket.id];
+        };
     });
 });
 
-setInterval(gameLoop, 1000/TPS);
+setInterval(gameLoop, 1000 * TURN_LENGTH);
 
 function gameLoop() {
     for(var p in players) {
         players[p].move();
     }
 
-    var data = {};
     for(var p in players) {
-        data.view = players[p].getView();
-        data.inventory = players[p].getInventory();
-        users[p].emit('update', data);
+        users[p].emit('update', players[p].view());
     }
 }
